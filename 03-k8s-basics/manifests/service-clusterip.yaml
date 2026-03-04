@@ -1,0 +1,21 @@
+# Service (ClusterIP): 叢集內部存取
+# 使用方式: kubectl apply -f service-clusterip.yaml
+# 叢集內部的其他 Pod 可透過 demo-app-service.demo.svc.cluster.local 存取
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-app-service
+  namespace: demo
+  labels:
+    app: demo
+spec:
+  # ClusterIP 是預設類型，僅叢集內部可存取
+  type: ClusterIP
+  # 選擇器: 將流量轉發到符合 label 的 Pod
+  selector:
+    app: demo
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80           # Service 對外的埠
+      targetPort: 3000   # Pod 的實際埠

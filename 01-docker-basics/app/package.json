@@ -1,0 +1,12 @@
+{
+  "name": "k8s-demo-app",
+  "version": "1.0.0",
+  "description": "K8s 教育訓練範例應用程式",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

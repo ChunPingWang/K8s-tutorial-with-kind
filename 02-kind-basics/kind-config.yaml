@@ -1,0 +1,30 @@
+# Kind 多節點叢集設定檔
+# 使用方式: kind create cluster --name my-cluster --config kind-config.yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  # Control Plane 節點
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # HTTP
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      # HTTPS
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+      # NodePort 範例
+      - containerPort: 30000
+        hostPort: 30000
+        protocol: TCP
+  # Worker 節點 1
+  - role: worker
+  # Worker 節點 2
+  - role: worker

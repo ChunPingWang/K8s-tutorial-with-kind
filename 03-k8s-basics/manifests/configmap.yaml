@@ -1,0 +1,13 @@
+# ConfigMap: 儲存非機密的設定資料
+# 使用方式: kubectl apply -f configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config
+  namespace: demo
+data:
+  # 簡單的鍵值對
+  APP_NAME: "K8s Demo App"
+  LOG_LEVEL: "info"
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"

@@ -1,0 +1,8 @@
+# Namespace: 建立邏輯隔離的環境
+# 使用方式: kubectl apply -f namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+  labels:
+    purpose: training
