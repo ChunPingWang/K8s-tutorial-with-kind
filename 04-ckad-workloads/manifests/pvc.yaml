@@ -1,0 +1,24 @@
+# PersistentVolumeClaim (PVC)：請求持久化儲存
+# CKAD 考點：理解 PV/PVC 綁定與存取模式
+#
+# Kind 叢集預設提供 standard StorageClass（使用 rancher/local-path-provisioner）
+# 支援動態供應 PV
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: demo-pvc
+  namespace: demo
+  labels:
+    app: demo
+spec:
+  # 存取模式:
+  # - ReadWriteOnce (RWO): 單節點讀寫
+  # - ReadOnlyMany  (ROX): 多節點唯讀
+  # - ReadWriteMany (RWX): 多節點讀寫
+  accessModes:
+    - ReadWriteOnce
+  # 使用 Kind 預設的 StorageClass
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 100Mi

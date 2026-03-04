@@ -1,0 +1,63 @@
+# SecurityContext：控制容器的安全設定
+# CKAD 考點：設定 runAsUser, runAsNonRoot, readOnlyRootFilesystem, capabilities
+apiVersion: v1
+kind: Pod
+metadata:
+  name: security-demo
+  namespace: demo
+  labels:
+    app: security-demo
+spec:
+  # Pod 層級的安全設定（套用到所有容器）
+  securityContext:
+    # 以 UID 1000 執行
+    runAsUser: 1000
+    # 以 GID 3000 執行
+    runAsGroup: 3000
+    # Volume 的檔案群組設為 2000
+    fsGroup: 2000
+
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "User ID: $(id -u)"
+          echo "Group ID: $(id -g)"
+          echo "Groups: $(id -G)"
+          echo "---"
+          echo "Writing to writable dir..."
+          echo "data" > /tmp/writable/test.txt
+          cat /tmp/writable/test.txt
+          echo "Security context working correctly!"
+          sleep 3600
+
+      # 容器層級的安全設定
+      securityContext:
+        # 強制以非 root 執行
+        runAsNonRoot: true
+        # 唯讀根檔案系統
+        readOnlyRootFilesystem: true
+        # 禁止提權
+        allowPrivilegeEscalation: false
+        # 移除所有 Linux capabilities
+        capabilities:
+          drop:
+            - ALL
+
+      volumeMounts:
+        - name: writable-volume
+          mountPath: /tmp/writable
+
+      resources:
+        requests:
+          memory: "16Mi"
+          cpu: "25m"
+        limits:
+          memory: "32Mi"
+          cpu: "50m"
+
+  volumes:
+    - name: writable-volume
+      emptyDir: {}

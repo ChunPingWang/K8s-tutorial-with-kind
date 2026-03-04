@@ -1,0 +1,36 @@
+# Pod 使用 PersistentVolumeClaim 掛載持久化儲存
+# CKAD 考點：在 Pod 中使用 PVC
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-demo-pod
+  namespace: demo
+  labels:
+    app: pvc-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "Writing to persistent storage..."
+          echo "$(date) - Pod started on $(hostname)" >> /data/log.txt
+          echo "Content of /data/log.txt:"
+          cat /data/log.txt
+          echo "Data will persist even if this Pod is deleted!"
+          sleep 3600
+      volumeMounts:
+        - name: persistent-storage
+          mountPath: /data
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "50m"
+        limits:
+          memory: "64Mi"
+          cpu: "100m"
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: demo-pvc

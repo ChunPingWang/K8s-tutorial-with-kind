@@ -1,0 +1,39 @@
+# Ingress：HTTP/HTTPS 路由規則
+# CKAD 考點：設定 Ingress 規則、path 類型、host 路由
+#
+# 需要先安裝 Ingress Controller（如 nginx-ingress）
+# Kind 安裝方式:
+#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+  namespace: demo
+  labels:
+    app: demo
+  annotations:
+    # nginx ingress controller 專用設定
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    # 規則 1：基於 Host 的路由
+    - host: demo.local
+      http:
+        paths:
+          # /api/* 路由到 API Service
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-app-service
+                port:
+                  number: 80
+          # / 路由到前端 Service
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-app-service
+                port:
+                  number: 80

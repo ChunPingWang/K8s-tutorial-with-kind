@@ -1,0 +1,20 @@
+# ResourceQuota：限制 Namespace 的資源使用上限
+# CKAD 考點：理解 ResourceQuota 的作用與設定
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: demo-quota
+  namespace: demo
+spec:
+  hard:
+    # 計算資源限制
+    requests.cpu: "2"
+    requests.memory: "2Gi"
+    limits.cpu: "4"
+    limits.memory: "4Gi"
+    # 物件數量限制
+    pods: "20"
+    services: "10"
+    configmaps: "10"
+    secrets: "10"
+    persistentvolumeclaims: "5"

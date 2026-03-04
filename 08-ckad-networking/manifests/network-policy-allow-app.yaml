@@ -1,0 +1,41 @@
+# NetworkPolicy：允許特定流量
+# CKAD 考點：設定 ingress/egress 規則
+#
+# 此規則允許：
+#   - 帶有 role=frontend label 的 Pod 可以存取 app=demo 的 Pod
+#   - 僅允許 TCP 3000 埠
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: demo
+spec:
+  # 套用對象：帶有 app=demo label 的 Pod
+  podSelector:
+    matchLabels:
+      app: demo
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # 規則 1：允許來自 frontend 的 TCP 3000 流量
+    - from:
+        - podSelector:
+            matchLabels:
+              role: frontend
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    # 允許所有 DNS 查詢（port 53）
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # 允許對外連線到任何 TCP 443（HTTPS）
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443

@@ -1,0 +1,21 @@
+# Blue-Green Service：透過修改 selector 切換流量
+# 切換方式:
+#   指向 Blue:  kubectl patch svc webapp-service -n demo -p '{"spec":{"selector":{"version":"blue"}}}'
+#   指向 Green: kubectl patch svc webapp-service -n demo -p '{"spec":{"selector":{"version":"green"}}}'
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+  namespace: demo
+  labels:
+    app: webapp
+spec:
+  type: ClusterIP
+  # 初始指向 Blue 版本
+  selector:
+    app: webapp
+    version: blue
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP

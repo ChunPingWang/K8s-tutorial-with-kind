@@ -1,0 +1,56 @@
+# 日誌收集範例：多容器 Pod 日誌
+# CKAD 考點：使用 kubectl logs 查看容器日誌
+apiVersion: v1
+kind: Pod
+metadata:
+  name: logging-demo
+  namespace: demo
+  labels:
+    app: logging-demo
+spec:
+  containers:
+    # 容器 1：產生應用日誌
+    - name: app
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          i=0
+          while true; do
+            i=$((i+1))
+            echo "$(date +%Y-%m-%dT%H:%M:%S) [INFO] Request #${i} processed"
+            if [ $((i % 5)) -eq 0 ]; then
+              echo "$(date +%Y-%m-%dT%H:%M:%S) [WARN] Slow query detected on request #${i}"
+            fi
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "$(date +%Y-%m-%dT%H:%M:%S) [ERROR] Connection timeout on request #${i}" >&2
+            fi
+            sleep 3
+          done
+      resources:
+        requests:
+          memory: "16Mi"
+          cpu: "25m"
+        limits:
+          memory: "32Mi"
+          cpu: "50m"
+
+    # 容器 2：產生存取日誌
+    - name: access-log
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          while true; do
+            echo "$(date +%Y-%m-%dT%H:%M:%S) 200 GET /api/data 15ms"
+            sleep 5
+            echo "$(date +%Y-%m-%dT%H:%M:%S) 201 POST /api/users 42ms"
+            sleep 5
+          done
+      resources:
+        requests:
+          memory: "16Mi"
+          cpu: "25m"
+        limits:
+          memory: "32Mi"
+          cpu: "50m"

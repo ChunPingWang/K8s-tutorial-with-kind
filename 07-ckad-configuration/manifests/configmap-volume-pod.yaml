@@ -1,0 +1,68 @@
+# ConfigMap 以 Volume 方式掛載
+# CKAD 考點：ConfigMap 的兩種使用方式（env vs volume）
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config-file
+  namespace: demo
+data:
+  # 設定檔內容
+  app.properties: |
+    server.port=8080
+    server.name=demo-app
+    log.level=INFO
+    db.host=localhost
+    db.port=5432
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name localhost;
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+    }
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo
+  namespace: demo
+  labels:
+    app: configmap-volume-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "=== ConfigMap as Volume ==="
+          echo ""
+          echo "--- app.properties ---"
+          cat /config/app.properties
+          echo ""
+          echo "--- nginx.conf ---"
+          cat /config/nginx.conf
+          echo ""
+          echo "Files in /config:"
+          ls -la /config/
+          sleep 3600
+      volumeMounts:
+        - name: config-volume
+          mountPath: /config
+          readOnly: true
+      resources:
+        requests:
+          memory: "16Mi"
+          cpu: "25m"
+        limits:
+          memory: "32Mi"
+          cpu: "50m"
+
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-config-file

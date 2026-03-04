@@ -1,0 +1,18 @@
+# Canary Service：選取所有帶有 app=canary-app 的 Pod
+# 不管是 stable 還是 canary 都會被選到，流量按 Pod 數量比例分配
+apiVersion: v1
+kind: Service
+metadata:
+  name: canary-service
+  namespace: demo
+  labels:
+    app: canary-app
+spec:
+  type: ClusterIP
+  # 只用 app label，同時選取 stable 和 canary 的 Pod
+  selector:
+    app: canary-app
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP

@@ -1,0 +1,38 @@
+# Blue-Green Deployment：Green 版本（新版本，準備切換）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-green
+  namespace: demo
+  labels:
+    app: webapp
+    version: green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webapp
+      version: green
+  template:
+    metadata:
+      labels:
+        app: webapp
+        version: green
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Green version (v2) running on $(hostname)"
+              while true; do sleep 10; done
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"

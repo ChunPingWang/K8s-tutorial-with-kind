@@ -1,0 +1,54 @@
+# Rolling Update Deployment
+# CKAD 考點：滾動更新策略與參數設定
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rolling-demo
+  namespace: demo
+  labels:
+    app: rolling-demo
+  # 記錄變更原因（用於 rollout history）
+  annotations:
+    kubernetes.io/change-cause: "Initial deployment v1"
+spec:
+  replicas: 4
+  # 保留的 ReplicaSet 歷史版本數
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: rolling-demo
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # 更新期間允許超出 replicas 的 Pod 數量
+      maxSurge: 1
+      # 更新期間允許不可用的 Pod 數量
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: rolling-demo
+        version: v1
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "App v1 running on $(hostname)"
+              while true; do sleep 10; done
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+          readinessProbe:
+            exec:
+              command: ['sh', '-c', 'true']
+            initialDelaySeconds: 2
+            periodSeconds: 5

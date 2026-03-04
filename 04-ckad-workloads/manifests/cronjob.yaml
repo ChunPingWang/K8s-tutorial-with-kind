@@ -1,0 +1,47 @@
+# CronJob：定期排程執行的 Job
+# CKAD 考點：CronJob 排程語法與管理
+#
+# Cron 語法: 分 時 日 月 星期
+# */1 * * * * = 每分鐘執行一次
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: health-check-cron
+  namespace: demo
+  labels:
+    app: health-check
+spec:
+  schedule: "*/1 * * * *"
+  # 允許同時存在的 Job 數量策略
+  # Allow: 允許同時執行 | Forbid: 禁止同時執行 | Replace: 替換舊的
+  concurrencyPolicy: Forbid
+  # 保留成功的 Job 歷史數量
+  successfulJobsHistoryLimit: 3
+  # 保留失敗的 Job 歷史數量
+  failedJobsHistoryLimit: 1
+  # 如果錯過排程超過此秒數，視為失敗
+  startingDeadlineSeconds: 60
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: health-check
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: health-checker
+              image: busybox:1.36
+              command: ['sh', '-c']
+              args:
+                - |
+                  echo "$(date) - Running health check..."
+                  echo "System OK"
+              resources:
+                requests:
+                  memory: "16Mi"
+                  cpu: "25m"
+                limits:
+                  memory: "32Mi"
+                  cpu: "50m"

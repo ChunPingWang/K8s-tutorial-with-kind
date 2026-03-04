@@ -1,0 +1,41 @@
+# Canary Deployment：穩定版本（接收大部分流量）
+# CKAD 考點：使用多個 Deployment + 共用 Service 實現 Canary 部署
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-stable
+  namespace: demo
+  labels:
+    app: canary-app
+    track: stable
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: canary-app
+      track: stable
+  template:
+    metadata:
+      labels:
+        # Service 會透過 app: canary-app 選取所有版本的 Pod
+        app: canary-app
+        track: stable
+        version: v1
+    spec:
+      containers:
+        - name: app
+          image: busybox:1.36
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Stable v1 on $(hostname)"
+              while true; do sleep 10; done
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"

@@ -1,0 +1,17 @@
+# NetworkPolicy：預設拒絕所有 Ingress 流量
+# CKAD 考點：NetworkPolicy 的基本設定
+#
+# 注意：Kind 預設使用 kindnet CNI，不支援 NetworkPolicy
+# 如需測試，可安裝 Calico：
+#   kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all-ingress
+  namespace: demo
+spec:
+  # 套用到 namespace 中所有 Pod
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  # 不設定 ingress 規則 = 拒絕所有進入流量

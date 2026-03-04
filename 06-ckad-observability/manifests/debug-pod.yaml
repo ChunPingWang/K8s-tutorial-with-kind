@@ -1,0 +1,23 @@
+# Debug Pod：用於叢集內部除錯
+# CKAD 考點：使用臨時 Pod 進行除錯
+apiVersion: v1
+kind: Pod
+metadata:
+  name: debug-pod
+  namespace: demo
+  labels:
+    app: debug
+spec:
+  containers:
+    - name: debug
+      image: busybox:1.36
+      command: ['sh', '-c', 'sleep 3600']
+      # 提供各種除錯工具
+      # 可進入後使用: wget, nslookup, ping, nc 等
+      resources:
+        requests:
+          memory: "16Mi"
+          cpu: "25m"
+        limits:
+          memory: "32Mi"
+          cpu: "50m"

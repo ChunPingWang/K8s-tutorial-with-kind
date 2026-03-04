@@ -1,0 +1,66 @@
+# 探針（Probes）完整範例
+# CKAD 考點：三種探針的設定與差異
+#
+# livenessProbe:  容器是否存活？失敗 → 重啟容器
+# readinessProbe: 容器是否準備好接收流量？失敗 → 從 Service 移除
+# startupProbe:   容器是否已啟動完成？失敗 → 重啟容器（啟動期間停用其他探針）
+apiVersion: v1
+kind: Pod
+metadata:
+  name: probes-demo
+  namespace: demo
+  labels:
+    app: probes-demo
+spec:
+  containers:
+    - name: app
+      image: busybox:1.36
+      command: ['sh', '-c']
+      args:
+        - |
+          # 建立 health 和 ready 檔案
+          mkdir -p /tmp
+          echo "starting" > /tmp/started
+          sleep 5
+          echo "healthy" > /tmp/healthy
+          sleep 3
+          echo "ready" > /tmp/ready
+          echo "App fully started!"
+          while true; do sleep 10; done
+      ports:
+        - containerPort: 8080
+
+      # Startup Probe：確認應用程式已啟動
+      # 啟動完成前，liveness 和 readiness 不會執行
+      startupProbe:
+        exec:
+          command: ['cat', '/tmp/started']
+        # 最多等待 failureThreshold * periodSeconds = 10 * 3 = 30 秒
+        failureThreshold: 10
+        periodSeconds: 3
+
+      # Liveness Probe：確認容器是否存活
+      livenessProbe:
+        exec:
+          command: ['cat', '/tmp/healthy']
+        initialDelaySeconds: 0
+        periodSeconds: 10
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+      # Readiness Probe：確認容器是否可接收流量
+      readinessProbe:
+        exec:
+          command: ['cat', '/tmp/ready']
+        initialDelaySeconds: 0
+        periodSeconds: 5
+        timeoutSeconds: 3
+        failureThreshold: 3
+
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "25m"
+        limits:
+          memory: "64Mi"
+          cpu: "100m"
